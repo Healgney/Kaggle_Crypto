@@ -62,10 +62,6 @@ class EncoderDecoder(nn.Module):
         self.feature_number = feature_number
         self.d_model_Encoder = d_model_Encoder
         self.d_model_Decoder = d_model_Decoder
-        self.linear_price_series = nn.Linear(in_features=feature_number, out_features=d_model_Encoder)
-        self.linear_local_price = nn.Linear(in_features=feature_number, out_features=d_model_Decoder)
-        self.price_series_pe = price_series_pe
-        self.local_price_pe = local_price_pe
         self.local_context_length = local_context_length
         self.linear_out = nn.Linear(in_features=1+d_model_Encoder, out_features=1)
         self.linear_out2 = nn.Linear(in_features=1+d_model_Encoder, out_features=1)
