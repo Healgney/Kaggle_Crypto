@@ -5,11 +5,11 @@ import torch
 from torch import nn
 import numpy as np
 
-from network import MultiHeadedAttention
-from network import Encoder, Decoder, EncoderDecoder
-from network.layer.encoder import EncoderLayer
-from rat.network.layer.decoder import DecoderLayer
-from rat.network.positional_encoding import PositionwiseFeedForward, PositionalEncoding
+from network.attention import MultiHeadedAttention
+from network.Encoder_Decoder import Encoder, Decoder, EncoderDecoder
+from network.Layer.Encoder import EncoderLayer
+from network.Layer.Decoder import DecoderLayer
+from network.positional_encoding import PositionwiseFeedForward, PositionalEncoding
 
 
 def make_model(batch_size, coin_num, window_size, feature_number, N=6,
