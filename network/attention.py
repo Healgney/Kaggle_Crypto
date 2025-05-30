@@ -99,3 +99,29 @@ class MultiHeadedAttention(nn.Module):
         # [128,11,5*31,2*12]->[128,11,5,31,2*12]
         key = key.contiguous().view(key_size1, key_size0, self.local_context_length, key_size2, key_size3)
         # [128,11,5,31,2*12]->[128,11,31,2*12]
+        ##################################################### value matrix #############################################################################
+        value = value.view(key_size0 * key_size1, key_size2, key_size3)  # [4,128,31,2*12]->[4*128,31,2*12]
+        nbatches = q_size0 * q_size1
+        value = self.linears[0](value).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)  # [11*128,31,2,12]
+
+        ################################################ Multi-head attention ##########################################################################
+        x, self.attn = attention(query, key, value, mask=None,
+                                 dropout=self.dropout)
+        x = x.transpose(1, 2).contiguous() \
+            .view(nbatches, -1, self.h * self.d_k)
+        x = x.view(q_size0, q_size1, q_size2, q_size3)  # D[11,128,1,2*12] or E[11,128,31,2*12]
+
+        return self.linears[-1](x)
+
+    if __name__ == '__main__':
+        batch = 1
+        time_len = 30
+        feature = 3
+
+        q = torch.arange(0, batch * time_len * feature).view(batch, time_len, feature)
+        k = torch.arange(0, batch * time_len * feature).view(batch, time_len, feature)
+        v = torch.arange(0, batch * time_len * feature).view(batch, time_len, feature)
+
+        mha = MultiHeadedAttention(h=1, d_model=feature, local_context_length=3, device='mps')
+
+        output = mha(q, k, v)
