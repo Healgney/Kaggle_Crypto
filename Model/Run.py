@@ -1,6 +1,12 @@
+import lightning as pl
+import torch
+from torch.utils.data import DataLoader, Dataset
+import torch.nn.functional as F
+import pandas as pd
 
+from glob import glob
 
-class Mydataset(Dataset):
+class Crypto_dataset(Dataset):
 
     """
     自定义Dataset。每次返回一个(x, y)对。
@@ -8,14 +14,26 @@ class Mydataset(Dataset):
             data_x: numpy array 或 torch.Tensor，shape=(样本数, 特征数)
             data_y: numpy array 或 torch.Tensor，shape=(样本数, 1)
     """
-    def __init__(self, data_x, data_y):
+    def __init__(self, data_path = '/kaggle_crypto_data'):
         '''
         :param data_x: [N, feature_dim]
         :param data_y: [N, 1]
         '''
         super().__init__()
-        self.x = torch.tensor(data_x, dtype = torch.float32)
-        self.y = torch.tensor(data_y, dtype = torch.float32)
+
+        mat_file = glob(data_path + '/*.parquet')
+
+        data = {}
+
+        for f in mat_file:
+            df = pd.read_parquet(f)
+            name = f.split('/')[-1].split('.')[0]
+            data[name] = df
+
+
+
+        # self.x = torch.tensor(data_x, dtype = torch.float32)
+        # self.y = torch.tensor(data_y, dtype = torch.float32)
 
     def __len__(self):
         return len(self.x)
@@ -27,7 +45,7 @@ class Mydataset(Dataset):
         return self.x[idx], self.y[idx]
 
 
-class MyModel(pl.LightningModule):
+class Crypto(pl.LightningModule):
     def __init__(self, model, lr = 1e-3):
         '''
         :param model:
