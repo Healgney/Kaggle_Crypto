@@ -56,21 +56,21 @@ class MultiHeadedAttention(nn.Module):
         ##################################query#################################################
 
         ########################################### local-attention ######################################################
-        '''
+
         local_weight_q = torch.matmul(query[:, self.local_context_length - 1:, :],# 未来时间N - 4，全部时间N
                                       query.transpose(-2, -1)) / ma.sqrt(q_size2)  # [batch_size, time_len-4, time_len]
         # [batch_size, time_len-4, time_len]->[batch_size, 1, 5* (time_len-4)]
         local_weight_q_list = [F.softmax(local_weight_q[:, i: i + 1, i: i + self.local_context_length], dim=-1) for i
-                               in range(q_size1)] #进行窗口内的softmax，就不需要mask # time_len * [batch_size, 1, window size]
+                               in range(q_size1-self.local_context_length+1)] #进行窗口内的softmax，就不需要mask # time_len * [batch_size, 1, window size]
         local_weight_q_list = torch.cat(local_weight_q_list, 2)# 拼接softmax结果
         # [batch_size, 1, 5* (time_len-4)]->[batch_size, 5* (time_len-4), 1]
         local_weight_q_list = local_weight_q_list.permute(0, 2, 1)
         # [batch_size, (time_len-4), feature]->[batch_size, 5* (time_len-4), feature]
-        '''
+
         q_list = [query[:, i: i + self.local_context_length, :] for i in range(q_size1-self.local_context_length+1)]
         q_list = torch.cat(q_list, 1)
         # [batch_size, 5* (time_len-4), 1]*[batch_size, 5* (time_len-4), feature]->[batch_size, 5* (time_len-4), feature]
-        #query = local_weight_q_list * q_list # 时间窗口*时间窗口
+        query = local_weight_q_list * q_list # 时间窗口*时间窗口
         query = q_list
         # [batch_size, 5* (time_len-4), feature]->[batch_size, (time_len-4), 5, feature] # contiguous() 会 重新分配内存，这样view可以直接根据处理好的query改
         query = query.contiguous().view(q_size0, q_size1-self.local_context_length+1, self.local_context_length, q_size2)
@@ -78,50 +78,48 @@ class MultiHeadedAttention(nn.Module):
         query = torch.sum(query, -2)
         ######################################################################################
         # [[batch_size, head, (time_len-4), feature/head]
-        query = query.contiguous().view(q_size0, q_size1, self.h, self.d_k).transpose(1,#分出来head，q_size3 = h*d_k
-                                                                                                2)
+        query = query.contiguous().view(q_size0, q_size1-self.local_context_length+1, self.h, self.d_k).transpose(1,#分出来head，q_size2 = h*d_k
+                                                                          2)
 
 
         ########################################### local-attention ##########################################################################
-        local_weight_k = torch.matmul(key[:, :, self.local_context_length - 1:, :], key.transpose(-2, -1)) / ma.sqrt(
-            key_size3)  # [128,11,31,2*12] *[128,11,2*12,31+4]->[128,11,31,31+4]
-        # [128,11,31,31+4]->[128,11,1,5*31]
-        local_weight_k_list = [F.softmax(local_weight_k[:, :, i:i + 1, i:i + self.local_context_length], dim=-1) for i
-                               in range(key_size2)]
-        local_weight_k_list = torch.cat(local_weight_k_list, 3)
-        # [128,11,1,5*31]->[128,11,5*31,1]
-        local_weight_k_list = local_weight_k_list.permute(0, 1, 3, 2)
-        # [128,11,31+4,2*12]->[128,11,5*31,2*12]
-        k_list = [key[:, :, i:i + self.local_context_length, :] for i in range(key_size2)]
-        k_list = torch.cat(k_list, 2)
-        # [128,11,5*31,1]*[128,11,5*31,2*12]->[128,11,5*31,2*12]
+        local_weight_k = torch.matmul(key[:, self.local_context_length - 1:, :], key.transpose(-2, -1)) / ma.sqrt(
+            key_size2)
+        local_weight_k_list = [F.softmax(local_weight_k[:, i:i + 1, i:i + self.local_context_length], dim=-1) for i
+                               in range(key_size1-self.local_context_length+1)]
+        local_weight_k_list = torch.cat(local_weight_k_list, 2)
+        local_weight_k_list = local_weight_k_list.permute(0, 2, 1)
+        k_list = [key[:, i:i + self.local_context_length, :] for i in range(key_size1-self.local_context_length+1)]
+        k_list = torch.cat(k_list, 1)
         key = local_weight_k_list * k_list
-        # [128,11,5*31,2*12]->[128,11,5,31,2*12]
-        key = key.contiguous().view(key_size1, key_size0, self.local_context_length, key_size2, key_size3)
-        # [128,11,5,31,2*12]->[128,11,31,2*12]
+        key = key.contiguous().view(key_size0, key_size1-self.local_context_length+1, self.local_context_length, key_size2)
+        key = torch.sum(key, -2)
+
+        key = key.contiguous().view(key_size0, key_size1-self.local_context_length+1, self.h, self.d_k).transpose(1, 2)
         ##################################################### value matrix #############################################################################
-        value = value.view(key_size0 * key_size1, key_size2, key_size3)  # [4,128,31,2*12]->[4*128,31,2*12]
-        nbatches = q_size0 * q_size1
-        value = self.linears[0](value).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)  # [11*128,31,2,12]
+        value = self.linears[0](value).view(key_size0, key_size1-self.local_context_length+1, self.h, self.d_k).transpose(1, 2)  # [11*128,31,2,12]
 
         ################################################ Multi-head attention ##########################################################################
         x, self.attn = attention(query, key, value, mask=None,
                                  dropout=self.dropout)
         x = x.transpose(1, 2).contiguous() \
-            .view(nbatches, -1, self.h * self.d_k)
-        x = x.view(q_size0, q_size1, q_size2, q_size3)  # D[11,128,1,2*12] or E[11,128,31,2*12]
+            .view(key_size0, key_size1-self.local_context_length+1, self.h * self.d_k)
+        x = x.view(q_size0, q_size1-self.local_context_length+1, q_size2)  # [batch, time_len, feature]
+
 
         return self.linears[-1](x)
 
-    if __name__ == '__main__':
-        batch = 1
-        time_len = 30
-        feature = 3
 
-        q = torch.arange(0, batch * time_len * feature).view(batch, time_len, feature)
-        k = torch.arange(0, batch * time_len * feature).view(batch, time_len, feature)
-        v = torch.arange(0, batch * time_len * feature).view(batch, time_len, feature)
+if __name__ == '__main__':
+    batch = 1
+    time_len = 30
+    feature = 3
 
-        mha = MultiHeadedAttention(h=1, d_model=feature, local_context_length=3, device='mps')
 
-        output = mha(q, k, v)
+    q = torch.randn(batch,time_len, feature)
+    k = torch.randn(batch,time_len, feature)
+    v = torch.randn(batch,time_len-2, feature)
+
+    mha = MultiHeadedAttention(h=1, d_model = feature, local_context_length = 3, device = 'mps')
+
+    output = mha(q, k ,v)
