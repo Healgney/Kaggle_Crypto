@@ -35,39 +35,12 @@ class ParquetDataset(Dataset):
         return x, y
 
 
-class Crypto(pl.LightningModule):
-    def __init__(self, model, lr = 1e-3):
-        '''
-        :param model:
-        :param lr: learning rate
-        '''
-        super().__init__()
-        self.model = model
-        self.lr = lr
-        self.save_hyperparameters()  # 自动保存超参数，便于实验追踪和复现
+if __name__ == '__main__':
 
-    def forward(self, *args, **kwargs):
-        return self.model(*args, **kwargs)
+    dataset = ParquetDataset('/root/autodl-tmp/train.parquet')
 
-    def training_step(self, batch, batch_idx):
-        x, y = batch
-        y_prediction = self(x)
-        loss = F.mse_loss(y_prediction,y)
-        self.log('train_loss', loss, prog_bar = True)
-        return loss
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
 
-    def validation_step(self, batch, batch_idx):
-        x, y = batch
-        y_hat = self(x)
-        loss = F.mse_loss(y_hat, y)
-        self.log("val_loss", loss, prog_bar=True)
-        return loss
-
-    def test_step(self, batch, batch_idx):
-        x = batch
-        y_hat = self(x)
-        return y_hat
-
-    def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.lr)
-
+    for batch_x, batch_y in dataloader:
+        print(batch_x.shape, batch_y.shape)
+        break
