@@ -22,5 +22,19 @@ def train():
 
     trainer.fit(model)
 
+def evaluate():
+    config_dict = configure()
+
+    model_config = config_dict['model']
+    train_config = config_dict['train']
+
+    model = make_model(*model_config)
+    crypto = Crypto(model)
+
+    trainer = pl.Trainer(train_config)
+
+    trainer.fit(model)
+
+
 if __name__ == '__main__':
     train()

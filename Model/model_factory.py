@@ -12,6 +12,7 @@ from network.Layer.Decoder import DecoderLayer
 from network.positional_encoding import PositionwiseFeedForward, PositionalEncoding
 
 
+#When we self.model --> run forward in EncoderDecoder
 def make_model(batch_size, coin_num, window_size, feature_number, N=6,
                d_model_Encoder=512, d_model_Decoder=16, d_ff_Encoder=2048, d_ff_Decoder=64, h=8, dropout=0.0,
                local_context_length=3, device="cpu"):
@@ -19,7 +20,7 @@ def make_model(batch_size, coin_num, window_size, feature_number, N=6,
     c = copy.deepcopy
     attn_Encoder = MultiHeadedAttention(True, h, d_model_Encoder, 0.1, local_context_length, device)
     attn_Decoder = MultiHeadedAttention(True, h, d_model_Decoder, 0.1, local_context_length, device)
-    attn_En_Decoder = MultiHeadedAttention(False, h, d_model_Decoder, 0.1, 1, device)
+    attn_En_Decoder = MultiHeadedAttention(False, h, d_model_Decoder, 0.1, local_context_length, device)
     ff_Encoder = PositionwiseFeedForward(d_model_Encoder, d_ff_Encoder, dropout)
     ff_Encoder.to(device)
     ff_Decoder = PositionwiseFeedForward(d_model_Decoder, d_ff_Decoder, dropout)
@@ -28,7 +29,7 @@ def make_model(batch_size, coin_num, window_size, feature_number, N=6,
     position_Encoder.to(device)
     position_Decoder = PositionalEncoding(d_model_Decoder, window_size - local_context_length * 2 + 1, dropout)
 
-    model = EncoderDecoder(batch_size, coin_num, window_size, feature_number, d_model_Encoder, d_model_Decoder,
+    model = EncoderDecoder(batch_size, window_size, feature_number, d_model_Encoder, d_model_Decoder,
                            Encoder(EncoderLayer(d_model_Encoder, c(attn_Encoder), c(ff_Encoder), dropout), N),
                            Decoder(DecoderLayer(d_model_Decoder, c(attn_Decoder), c(attn_En_Decoder), c(ff_Decoder),
                                                 dropout), N),

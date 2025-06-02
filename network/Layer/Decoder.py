@@ -14,10 +14,10 @@ class DecoderLayer(nn.Module):
         self.feed_forward = feed_forward
         self.sublayer = clones(SublayerConnection(size, dropout), 3)
 
-    def forward(self, x, memory, price_series_mask, local_price_mask, padding_price):
+    def forward(self, x, memory, price_series_mask, local_price_mask):
         "Follow Figure 1 (right) for connections."
         m = memory
-        x = self.sublayer[0](x, lambda x: self.self_attn(x, x, x, local_price_mask, padding_price, padding_price))
+        x = self.sublayer[0](x, lambda x: self.self_attn(x, x, x, local_price_mask))
         x = x[:, :, -1:, :]
-        x = self.sublayer[1](x, lambda x: self.src_attn(x, m, m, price_series_mask, None, None))
+        x = self.sublayer[1](x, lambda x: self.src_attn(x, m, m, price_series_mask))
         return self.sublayer[2](x, self.feed_forward)
