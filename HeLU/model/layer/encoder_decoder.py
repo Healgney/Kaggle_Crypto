@@ -1,8 +1,7 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
-from network.Clones import clones
-from Layer.Norm import LayerNorm
+from HeLU.model.layer.clones import clones
+from .layer_norm import LayerNorm
 
 
 class Encoder(nn.Module):

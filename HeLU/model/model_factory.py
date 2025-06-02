@@ -1,15 +1,14 @@
 import copy
-import logging
 
 import torch
 from torch import nn
 import numpy as np
 
-from network.attention import MultiHeadedAttention
-from network.Encoder_Decoder import Encoder, Decoder, EncoderDecoder
-from network.Layer.Encoder import EncoderLayer
-from network.Layer.Decoder import DecoderLayer
-from network.positional_encoding import PositionwiseFeedForward, PositionalEncoding
+from HeLU.model.layer.attention import MultiHeadedAttention
+from HeLU.model.layer.encoder_decoder import Encoder, Decoder, EncoderDecoder
+from HeLU.model.layer.encoder import EncoderLayer
+from HeLU.model.layer.decoder import DecoderLayer
+from HeLU.model.layer.positional_encoding import PositionwiseFeedForward, PositionalEncoding
 
 
 #When we self.model --> run forward in EncoderDecoder

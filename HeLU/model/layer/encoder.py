@@ -1,5 +1,5 @@
 from torch import nn
-from network.Clones import clones
+from HeLU.model.layer.clones import clones
 from .sublayer import SublayerConnection
 
 ### Encoder的内部结构

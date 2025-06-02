@@ -1,5 +1,5 @@
 from torch import nn
-from .Norm import LayerNorm
+from .layer_norm import LayerNorm
 
 # 这里是ADD and Norm的模块
 class SublayerConnection(nn.Module):

@@ -2,7 +2,7 @@ import math as ma
 import torch
 import torch.nn.functional as F
 from torch import nn
-from network.Clones import clones
+from HeLU.model.layer.clones import clones
 
 '''
 query : [batch_size, time_len, feature_dim]
