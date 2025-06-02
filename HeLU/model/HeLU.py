@@ -8,7 +8,7 @@ from glob import glob
 from .model_factory import make_model
 
 def model_factory(config):
-    return make_model(*config)
+    return make_model(**config)
 
 class HeLU_Crypto(pl.LightningModule):
     def __init__(self, model_config:dict, lr = 1e-3):
