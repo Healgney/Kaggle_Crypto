@@ -17,9 +17,9 @@ def make_model(batch_size, coin_num, window_size, feature_number, N=6,
                local_context_length=3, device="cpu"):
     "Helper: Construct a model from hyperparameters."
     c = copy.deepcopy
-    attn_Encoder = MultiHeadedAttention(True, h, d_model_Encoder, 0.1, local_context_length, device)
-    attn_Decoder = MultiHeadedAttention(True, h, d_model_Decoder, 0.1, local_context_length, device)
-    attn_En_Decoder = MultiHeadedAttention(False, h, d_model_Decoder, 0.1, local_context_length, device)
+    attn_Encoder = MultiHeadedAttention(h, d_model_Encoder, local_context_length, 0.1)
+    attn_Decoder = MultiHeadedAttention(h, d_model_Encoder, local_context_length, 0.1)
+    attn_En_Decoder = MultiHeadedAttention(h, d_model_Encoder, local_context_length, 0.1)
     ff_Encoder = PositionwiseFeedForward(d_model_Encoder, d_ff_Encoder, dropout)
     ff_Encoder.to(device)
     ff_Decoder = PositionwiseFeedForward(d_model_Decoder, d_ff_Decoder, dropout)

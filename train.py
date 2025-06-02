@@ -17,10 +17,10 @@ def train():
     model_config = config_dict['model']
     train_config = config_dict['train']
 
-    model = HeLU_Crypto(*model_config)
+    model = HeLU_Crypto(model_config)
 
     trainer = pl.Trainer(
-        devices='cuda',
+        devices='mps',
         max_epochs=train_config['epochs'],
         progress_bar_refresh_rate=0,
         logger=True,

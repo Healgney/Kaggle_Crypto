@@ -20,7 +20,7 @@ def attention(query, key, value, mask=None, dropout=None):
 
 
 class MultiHeadedAttention(nn.Module):
-    def __init__(self, h, d_model, local_context_length, device, dropout = 0.1):
+    def __init__(self, h, d_model, local_context_length, dropout = 0.1, device='cpu'):
         '''
         :param h: number of head
         :param d_model: Features
