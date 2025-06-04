@@ -1,7 +1,9 @@
 from HeLU.model.model_factory import make_model
-from HeLU.model.HeLU import HeLU_Crypto
+from HeLU.model.HeLU_model import HeLU_Crypto
+from HeLU.dataset.crypto_dataset import ParquetDataset
 
 from HeLU.callback import logger_callback
+from torch.utils.data import DataLoader
 import lightning as pl
 import yaml
 
@@ -17,6 +19,9 @@ def train():
     model_config = config_dict['model']
     train_config = config_dict['train']
 
+    dataset = ParquetDataset('/root/autodl-tmp/train.parquet')
+    train_dataset = DataLoader(dataset, batch_size=1, shuffle=True)
+
     model = HeLU_Crypto(model_config)
 
     trainer = pl.Trainer(
@@ -27,7 +32,10 @@ def train():
         enable_progress_bar=True
     )
 
-    trainer.fit(model)
+    trainer.fit(
+        model=model,
+        train_dataloaders=train_dataset
+    )
 
 # def evaluate():
 #     config_dict = configure()

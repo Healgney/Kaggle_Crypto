@@ -14,7 +14,7 @@ model:
   h: 8
   dropout: 0.0
   local_context_length: 3
-  device: cpu #cuda
+  device: mps #cuda #cpu
 
 train:
   lr: 1e-5
