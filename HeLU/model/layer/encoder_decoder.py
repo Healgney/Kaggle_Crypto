@@ -61,20 +61,18 @@ class EncoderDecoder(nn.Module):
         self.d_model_Decoder = d_model_Decoder
         self.local_context_length = local_context_length
         self.linear_out = nn.Linear(in_features=1+d_model_Encoder, out_features=1)
-        self.linear_out2 = nn.Linear(in_features=1+d_model_Encoder, out_features=1)
         self.bias = torch.nn.Parameter(torch.zeros([1, 1, 1]))
         self.bias2 = torch.nn.Parameter(torch.zeros([1, 1, 1]))
 
     def forward(self,
                 price_series,
-                local_price_context,
                 price_series_mask,
                 local_price_mask):
         # price_series:[batch, time_len, feature]
         price_series = self.price_series_pe(price_series) # price_series:[batch, time_len, feature]
         encode_out = self.encoder(price_series, price_series_mask)
         #################################padding_price=None###########################################################################
-        decode_out = self.decoder(local_price_context, encode_out, price_series_mask, local_price_mask)# [batch, time_len, feature]
+        decode_out = self.decoder(price_series, encode_out, price_series_mask, local_price_mask)# [batch, time_len, feature]
         out = torch.squeeze(decode_out, 0)      # [time_len, feature]
         ###################################  linear  ##################################################
         out = self.linear_out(out)  # [time_len, 1]

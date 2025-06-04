@@ -12,7 +12,7 @@ from HeLU.model.layer.positional_encoding import PositionwiseFeedForward, Positi
 
 
 #When we self.model --> run forward in EncoderDecoder
-def make_model(batch_size, coin_num, window_size, feature_number, N=6,
+def make_model(batch_size, window_size, feature_number, N=6,
                d_model_Encoder=512, d_model_Decoder=16, d_ff_Encoder=2048, d_ff_Decoder=64, h=8, dropout=0.0,
                local_context_length=3, device="cpu"):
     "Helper: Construct a model from hyperparameters."
@@ -33,7 +33,7 @@ def make_model(batch_size, coin_num, window_size, feature_number, N=6,
                            Decoder(DecoderLayer(d_model_Decoder, c(attn_Decoder), c(attn_En_Decoder), c(ff_Decoder),
                                                 dropout), N),
                            c(position_Encoder),  # price series position ecoding
-                           c(position_Decoder),  # local_price_context position ecoding
+                           c(position_Decoder),  # price series position ecoding
                            local_context_length,
                            device)
     for p in model.parameters():
@@ -59,8 +59,9 @@ def subsequent_mask(size):
     return torch.from_numpy(subsequent_mask) == 0
 
 
-def make_std_mask(local_price_context, batch_size):
+def make_std_mask(x, batch_size):
     "Create a mask to hide padding and future words."
     local_price_mask = (torch.ones(batch_size, 1, 1) == 1)
-    local_price_mask = local_price_mask & (subsequent_mask(local_price_context.size(-2)).type_as(local_price_mask.data))
+    local_price_mask = local_price_mask & (subsequent_mask(x.size(-2)).type_as(local_price_mask.data))
     return local_price_mask
+
