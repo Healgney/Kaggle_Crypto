@@ -60,7 +60,7 @@ class EncoderDecoder(nn.Module):
         self.d_model_Decoder = d_model_Decoder
         self.price_series_pe = price_series_pe
         self.local_context_length = local_context_length
-        self.linear_out = nn.Linear(in_features=d_model_Encoder, out_features=1)
+        self.linear_out = nn.Linear(in_features=1+d_model_Encoder, out_features=1)
         self.bias = torch.nn.Parameter(torch.zeros([1, 1, 1]))
         self.bias2 = torch.nn.Parameter(torch.zeros([1, 1, 1]))
 
@@ -76,9 +76,8 @@ class EncoderDecoder(nn.Module):
         out = torch.squeeze(decode_out, 0)      # [time_len, feature]
         ###################################  linear  ##################################################
         out = self.linear_out(out)  # [time_len, 1]
-        print(f'out: {out.shape}')
-        print(f'self.bias: {self.bias.shape}')
-        bias = self.bias.repeat(out.size()[0], 1, 1)    #[time_len,1]
+
+        bias = self.bias.repeat(out.size()[0], 1)    #[time_len,1]
 
         out = out+bias
 
