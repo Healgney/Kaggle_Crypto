@@ -21,7 +21,7 @@ class PositionwiseFeedForward(nn.Module):
 class PositionalEncoding(nn.Module):
     "Implement the PE function."
 
-    def __init__(self, d_model, start_indx, dropout, max_len=5000):
+    def __init__(self, d_model, start_indx, dropout, max_len=32):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
         self.start_indx = start_indx
@@ -33,7 +33,7 @@ class PositionalEncoding(nn.Module):
                              -(math.log(10000.0) / d_model))
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(0)
+        #pe = pe.unsqueeze(0)
         self.register_buffer('pe', pe)
 
     def forward(self, x):

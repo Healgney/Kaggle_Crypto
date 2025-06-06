@@ -41,12 +41,12 @@ class EncoderDecoder(nn.Module):
     """
     def __init__(self,
                  batch_size,
-                 window_size,
                  feature_number,
                  d_model_Encoder,
                  d_model_Decoder,
                  encoder,
                  decoder,
+                 price_series_pe,
                  local_context_length,
                  device="cpu"):
 
@@ -55,10 +55,10 @@ class EncoderDecoder(nn.Module):
         self.encoder = encoder
         self.decoder = decoder
         self.batch_size = batch_size
-        self.window_size = window_size
         self.feature_number = feature_number
         self.d_model_Encoder = d_model_Encoder
         self.d_model_Decoder = d_model_Decoder
+        self.price_series_pe = price_series_pe
         self.local_context_length = local_context_length
         self.linear_out = nn.Linear(in_features=1+d_model_Encoder, out_features=1)
         self.bias = torch.nn.Parameter(torch.zeros([1, 1, 1]))

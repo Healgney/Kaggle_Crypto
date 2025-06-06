@@ -12,7 +12,7 @@ from HeLU.model.layer.positional_encoding import PositionwiseFeedForward, Positi
 
 
 #When we self.model --> run forward in EncoderDecoder
-def make_model(batch_size, window_size, feature_number, N=6,
+def make_model(batch_size, feature_number, N=6,
                d_model_Encoder=512, d_model_Decoder=16, d_ff_Encoder=2048, d_ff_Decoder=64, h=8, dropout=0.0,
                local_context_length=3, device="cpu"):
     "Helper: Construct a model from hyperparameters."
@@ -26,14 +26,12 @@ def make_model(batch_size, window_size, feature_number, N=6,
     ff_Decoder.to(device)
     position_Encoder = PositionalEncoding(d_model_Encoder, 0, dropout)
     position_Encoder.to(device)
-    position_Decoder = PositionalEncoding(d_model_Decoder, window_size - local_context_length * 2 + 1, dropout)
 
-    model = EncoderDecoder(batch_size, window_size, feature_number, d_model_Encoder, d_model_Decoder,
+    model = EncoderDecoder(batch_size, feature_number, d_model_Encoder, d_model_Decoder,
                            Encoder(EncoderLayer(d_model_Encoder, c(attn_Encoder), c(ff_Encoder), dropout), N),
                            Decoder(DecoderLayer(d_model_Decoder, c(attn_Decoder), c(attn_En_Decoder), c(ff_Decoder),
                                                 dropout), N),
                            c(position_Encoder),  # price series position ecoding
-                           c(position_Decoder),  # price series position ecoding
                            local_context_length,
                            device)
     for p in model.parameters():

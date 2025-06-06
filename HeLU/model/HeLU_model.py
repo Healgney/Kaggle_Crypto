@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader, Dataset
 import torch.nn.functional as F
 import pandas as pd
 from glob import glob
-from model_factory import make_model, make_std_mask
+from HeLU.model.model_factory import make_model, make_std_mask
 
 def model_parameter(config):
     return make_model(**config)
@@ -27,7 +27,9 @@ class HeLU_Crypto(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+        print(f'x: {x.shape}')
         mask = make_std_mask(x, self.batch_size)
+        print(f'mask: {mask.shape}')
         y_prediction = self(x,mask,mask)
         loss = F.mse_loss(y_prediction,y)
         self.log('train_loss', loss, prog_bar = True)
@@ -45,7 +47,7 @@ class HeLU_Crypto(pl.LightningModule):
         mask = make_std_mask(self.timewindow, self.batch_size)
         x = batch
         y_hat = self(x,self.timewindow,mask,mask)
-        return y_hat
+        return y_hat.to_csv('/root/autodl-tmp/Y_pred.csv')
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
