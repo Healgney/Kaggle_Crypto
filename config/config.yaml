@@ -2,8 +2,8 @@ data:
   data_path: drw_crypto # dir path
 
 model:
-  batch_size: 128
-  #window_size: 31
+  batch_size: 64
+  window_size: 32
   feature_number: 874
   N: 1
   d_model_Encoder: 874

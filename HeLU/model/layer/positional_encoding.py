@@ -33,10 +33,11 @@ class PositionalEncoding(nn.Module):
                              -(math.log(10000.0) / d_model))
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
+        pe.require_grad = False
         #pe = pe.unsqueeze(0)
         self.register_buffer('pe', pe)
 
     def forward(self, x):
-        x = x + Variable(self.pe[:, self.start_indx:self.start_indx + x.size(1)],
-                         requires_grad=False)
+        x = x + self.pe #Variable(self.pe[:, self.start_indx:self.start_indx + x.size(1)],
+                    #    requires_grad=False)
         return self.dropout(x)

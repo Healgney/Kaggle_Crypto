@@ -13,12 +13,13 @@ def configure(config_path = 'config/config.yaml'):
         config_dict = yaml.safe_load(f)
     return config_dict
 
+
 def data_split(Train):
     train_len = int(0.8 * len(Train))
     return Train[:train_len], Train[train_len:]
 
-'''
 
+'''
 def train():
     config_dict = configure()
 
@@ -52,12 +53,14 @@ def train():
 #     trainer.fit(model)
 
 if __name__ == '__main__':
-    dataset = ParquetDataset('/Users/wangyuhao/Desktop/drw-crypto-market-prediction/train.parquet')
-    testing_dataset = pd.read_parquet('/Users/wangyuhao/Desktop/drw-crypto-market-prediction/test.parquet')
     config_dict = configure()
-
     model_config = config_dict['model']
     train_config = config_dict['train']
+    dataset = ParquetDataset('/Users/wangyuhao/Desktop/drw-crypto-market-prediction/train.parquet', model_config['window_size'])
+    testing_dataset = pd.read_parquet('/Users/wangyuhao/Desktop/drw-crypto-market-prediction/test.parquet')
+
+
+
 
     model = HeLU_Crypto(model_config)
 
