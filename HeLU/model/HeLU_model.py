@@ -19,7 +19,7 @@ class HeLU_Crypto(pl.LightningModule):
         self.model = model_parameter(model_config)
         self.lr = lr
         self.save_hyperparameters()
-        self.timewindow = model_config['local_context_length']
+        self.time_window = model_config['local_context_length']
         self.batch_size = model_config['batch_size']
 
     def forward(self, *args, **kwargs):
@@ -27,8 +27,11 @@ class HeLU_Crypto(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+        print(f'x: {x.shape}')
         mask = make_std_mask(x, self.batch_size)
+        print(f'mask: {mask.shape}')
         y_prediction = self(x,mask,mask)
+
         loss = F.mse_loss(y_prediction,y)
         self.log('train_loss', loss, prog_bar = True)
         return loss
@@ -36,16 +39,16 @@ class HeLU_Crypto(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, y = batch
         mask = make_std_mask(x, self.batch_size)
-        y_hat = self(x,mask,mask)
+        y_hat = self(x, mask, mask)
         loss = F.mse_loss(y_hat, y)
         self.log("val_loss", loss, prog_bar=True)
         return loss
 
-    def test_step(self, batch, batch_idx):
-        mask = make_std_mask(self.timewindow, self.batch_size)
-        x = batch
-        y_hat = self(x,self.timewindow,mask,mask)
-        return y_hat.to_csv('/root/autodl-tmp/Y_pred.csv')
+    # def test_step(self, batch, batch_idx):
+    #     mask = make_std_mask(, self.batch_size)
+    #     x = batch
+    #     y_hat = self(x,self.time_window,mask,mask)
+    #     return y_hat.to_csv('/root/autodl-tmp/Y_pred.csv')
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)

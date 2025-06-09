@@ -7,14 +7,13 @@ from glob import glob
 
 
 class ParquetDataset(Dataset):
-    def __init__(self, parquet_file, label_col='label', device='cpu', remove_nan=True):
+    def __init__(self, parquet_file, window_size, label_col='label', device='cpu', remove_nan=True):
         self.device = device
-        df = pd.read_parquet(parquet_file)
+        df = pd.read_parquet(parquet_file).iloc[:6*window_size-1]
 
-        print(len(list(df.columns)))
+        self.window_size = window_size
         cols_to_drop = [f"X{i}" for i in range(697, 718)]
         df.drop(columns=cols_to_drop, inplace=True)
-        print(len(list(df.columns)))
 
         df.replace([float('inf'), float('-inf')], pd.NA, inplace=True)
 
@@ -30,17 +29,8 @@ class ParquetDataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, idx):
-        x = self.features[idx].to(self.device)
-        y = self.labels[idx].to(self.device)
+
+        x = self.features[idx:idx+self.window_size, :].to(self.device)
+
+        y = self.labels[idx:idx+self.window_size].unsqueeze(-1).to(self.device)
         return x, y
-
-
-if __name__ == '__main__':
-
-    dataset = ParquetDataset('/root/autodl-tmp/train.parquet')
-
-    dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
-
-    for batch_x, batch_y in dataloader:
-        print(batch_x.shape, batch_y.shape)
-        break
