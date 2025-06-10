@@ -9,10 +9,6 @@ from HeLU.model.model_factory import make_model, make_std_mask
 def model_parameter(config):
     return make_model(**config)
 
-def calculate_pearson_correlation(y_true, y_pred):
-    #TODO: pearson calculation
-    pearson_corr = 0
-    return pearson_corr
 
 class HeLU_Crypto(pl.LightningModule):
     def __init__(self, model_config:dict, lr = 1e-3):
@@ -50,12 +46,9 @@ class HeLU_Crypto(pl.LightningModule):
         return loss
 
     def predict_step(self, batch, batch_idx):
-        x, y = batch
+        x, _ = batch
         predictions = self(x)
-
-        pearson_corr = calculate_pearson_correlation(y, predictions)
-
-        return pearson_corr
+        return predictions
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
