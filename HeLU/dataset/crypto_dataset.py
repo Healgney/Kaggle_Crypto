@@ -9,7 +9,7 @@ from glob import glob
 class ParquetDataset(Dataset):
     def __init__(self, parquet_file, window_size, label_col='label', device='cpu', remove_nan=True):
         self.device = device
-        df = pd.read_parquet(parquet_file).iloc[:6*window_size-1]
+        df = pd.read_parquet(parquet_file) #.iloc[:6*window_size-1]
 
         self.window_size = window_size
         cols_to_drop = [f"X{i}" for i in range(697, 718)]
