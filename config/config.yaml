@@ -13,8 +13,11 @@ model:
   h: 2
   dropout: 0.0
   local_context_length: 4
-  device: mps #cuda
+  device: cuda
 
 train:
-  lr: 1e-5
-  epochs: 10
+  lr: 1e-6
+  epochs: 200
+
+logger:
+  type: tensorboard
