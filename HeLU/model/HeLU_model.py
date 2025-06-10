@@ -9,6 +9,11 @@ from HeLU.model.model_factory import make_model, make_std_mask
 def model_parameter(config):
     return make_model(**config)
 
+def calculate_pearson_correlation(y_true, y_pred):
+    #TODO: pearson calculation
+    pearson_corr = 0
+    return pearson_corr
+
 class HeLU_Crypto(pl.LightningModule):
     def __init__(self, model_config:dict, lr = 1e-3):
         '''
@@ -27,9 +32,9 @@ class HeLU_Crypto(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
-        print(f'x: {x.shape}')
+        # print(f'x: {x.shape}')
         mask = make_std_mask(x, self.batch_size)
-        print(f'mask: {mask.shape}')
+        # print(f'mask: {mask.shape}')
         y_prediction = self(x,mask,mask)
 
         loss = F.mse_loss(y_prediction,y)
@@ -44,11 +49,13 @@ class HeLU_Crypto(pl.LightningModule):
         self.log("val_loss", loss, prog_bar=True)
         return loss
 
-    # def test_step(self, batch, batch_idx):
-    #     mask = make_std_mask(, self.batch_size)
-    #     x = batch
-    #     y_hat = self(x,self.time_window,mask,mask)
-    #     return y_hat.to_csv('/root/autodl-tmp/Y_pred.csv')
+    def predict_step(self, batch, batch_idx):
+        x, y = batch
+        predictions = self(x)
+
+        pearson_corr = calculate_pearson_correlation(y, predictions)
+
+        return pearson_corr
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
