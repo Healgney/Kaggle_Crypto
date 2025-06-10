@@ -37,7 +37,6 @@ def train():
         enable_progress_bar=True,
     )
 
-
     trainer.fit(model, train_dataloaders = DataLoader(dataset, batch_size=64, shuffle=False, num_workers=0, drop_last=True))
 
 def evaluate():
