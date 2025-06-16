@@ -21,7 +21,7 @@ class PositionwiseFeedForward(nn.Module):
 class PositionalEncoding(nn.Module):
     "Implement the PE function."
 
-    def __init__(self, d_model, start_indx, dropout, max_len=32):
+    def __init__(self, d_model, start_indx, dropout, max_len=128):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
         self.start_indx = start_indx

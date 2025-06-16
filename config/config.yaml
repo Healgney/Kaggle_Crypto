@@ -2,22 +2,27 @@ data:
   data_path: drw_crypto # dir path
 
 model:
-  batch_size: 64
-  window_size: 32
+  batch_size: 106
+  window_size: 128
   feature_number: 874
   N: 1
   d_model_Encoder: 874
   d_model_Decoder: 874
-  d_ff_Encoder: 2048
+  d_ff_Encoder: 512
   d_ff_Decoder: 64
   h: 2
-  dropout: 0.0
-  local_context_length: 4
+  dropout: 0.2
+  local_context_length: 12
   device: cuda
 
 train:
   lr: 1e-6
-  epochs: 200
+  epochs: 10
+  optimizer:
+    learning_rate: 5.0e-5
+    weight_decay: 1.0e-7
+    t_initial: 10000
+    warmup_t: 5000 #20000
 
 logger:
   type: tensorboard

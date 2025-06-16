@@ -15,7 +15,7 @@ def make_single_logger(config: dict) -> Logger:
 
     if logger_cfg['type'] == "tensorboard":
         logger = TensorBoardLogger(
-            save_dir=logger_cfg.get("save_dir", "logs"),
+            save_dir=logger_cfg.get("save_dir", "/root/tf-logs"),
             name=logger_cfg.get("name", "temp_exp"),
             version=logger_cfg.get("version"),
         )

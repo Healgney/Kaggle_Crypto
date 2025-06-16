@@ -3,7 +3,7 @@ from torch import nn
 
 
 class Batch_Loss(nn.Module):
-    def __init__(self, commission_ratio, interest_rate, gamma=0.1, beta=0.1, device="cpu"):
+    def __init__(self, commission_ratio, interest_rate, gamma=0.1, beta=0.1, device="cuda"):
         super(Batch_Loss, self).__init__()
         self.gamma = gamma  # variance penalty
         self.beta = beta

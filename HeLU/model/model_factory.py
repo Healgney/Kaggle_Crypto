@@ -14,7 +14,7 @@ from HeLU.model.layer.positional_encoding import PositionwiseFeedForward, Positi
 #When we self.model --> run forward in EncoderDecoder
 def make_model(batch_size, window_size, feature_number, N=6,
                d_model_Encoder=512, d_model_Decoder=16, d_ff_Encoder=2048, d_ff_Decoder=64, h=8, dropout=0.0,
-               local_context_length=3, device="cpu"):
+               local_context_length=3, device="cuda"):
     "Helper: Construct a model from hyperparameters."
     c = copy.deepcopy
     attn_Encoder = MultiHeadedAttention(h, d_model_Encoder, local_context_length, 0.1)

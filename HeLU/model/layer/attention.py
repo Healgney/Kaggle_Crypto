@@ -12,18 +12,18 @@ def attention(query, key, value, mask=None, dropout=None):
     d_k = query.size(-1)
     scores = torch.matmul(query, key.transpose(-2, -1)) / ma.sqrt(d_k)
     if mask is not None:
-        print(f'mask: {mask.shape}')
-        print(f'scores: {scores.shape}')
+        # print(f'mask: {mask.shape}')
+        # print(f'scores: {scores.shape}')
         scores = scores.masked_fill(mask == 0, -1e9)
     p_attn = F.softmax(scores, dim=-1)
-    print(f'p_attn: {p_attn.shape}')
+    # print(f'p_attn: {p_attn.shape}')
     if dropout is not None:
         p_attn = dropout(p_attn)
     return torch.matmul(p_attn, value), p_attn
 
 
 class MultiHeadedAttention(nn.Module):
-    def __init__(self, h, d_model, local_context_length, dropout = 0.1, device='cpu'):
+    def __init__(self, h, d_model, local_context_length, dropout = 0.1, device='cuda'):
         '''
         :param h: number of head
         :param d_model: Features
@@ -50,8 +50,8 @@ class MultiHeadedAttention(nn.Module):
             mask = mask.unsqueeze(1)
             mask = mask.repeat(1, self.h, 1, 1)
             mask = mask.to(self.device)
-        print(f'query: {query.shape}')
-        print(f'key: {key.shape}')
+        # print(f'query: {query.shape}')
+        # print(f'key: {key.shape}')
         q_size0 = query.size(0)  # batch
         q_size1 = query.size(1)  # time_len
         q_size2 = query.size(2)  # features
@@ -107,13 +107,13 @@ class MultiHeadedAttention(nn.Module):
         ##################################################### value matrix #############################################################################
 
         value = self.linears[0](value).view(key_size0, key_size1, self.h, self.d_k).transpose(1, 2)  # [11*128,31,2,12]
-        print(f'value: {value.shape}')
+        # print(f'value: {value.shape}')
         ################################################ Multi-head attention ##########################################################################
         x, self.attn = attention(query, key, value, mask=mask,
                                  dropout=self.dropout)
         x = x.transpose(1, 2).contiguous() \
             .view(key_size0, key_size1, self.h * self.d_k)
-        print(f'x after attention: {x.shape}')
+        # print(f'x after attention: {x.shape}')
         x = x.view(q_size0, q_size1, q_size2)  # [batch, time_len, feature]
 
 

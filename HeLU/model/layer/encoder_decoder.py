@@ -48,7 +48,7 @@ class EncoderDecoder(nn.Module):
                  decoder,
                  price_series_pe,
                  local_context_length,
-                 device="cpu"):
+                 device="cuda"):
 
         super().__init__()
         self.device = device
@@ -76,8 +76,8 @@ class EncoderDecoder(nn.Module):
         out = torch.squeeze(decode_out, 0)      # [time_len, feature]
         ###################################  linear  ##################################################
         out = self.linear_out(out)  # [time_len, 1]
-        print(f'out: {out.shape}')
-        print(f'self.bias: {self.bias.shape}')
+        # print(f'out: {out.shape}')
+        # print(f'self.bias: {self.bias.shape}')
         bias = self.bias.repeat(out.size()[0], 1, 1)    #[time_len,1]
 
         out = out+bias
